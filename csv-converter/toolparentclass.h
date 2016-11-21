@@ -2,7 +2,7 @@
 #define TOOLPARENTCLASS_H
 
 #include <QString>
-#include <vector>
+#include <map>
 #include "toolsubclass.h"
 
 using namespace std;
@@ -19,15 +19,13 @@ public:
     QString getName() const;
     void setName(const QString &value);
 
-    vector<ToolSubClass> getSubclasses() const;
-    void setSubclasses(const vector<ToolSubClass> &value);
+	map<QString, ToolSubClass> getSubclasses() const;
+	void setSubclasses(const map<QString, ToolSubClass> &value);
 
 private:
     int id;
     QString name;
-    vector<ToolSubClass> subclasses;
-
-
+    map<QString, ToolSubClass> subclasses;
 };
 
 #endif // TOOLPARENTCLASS_H

@@ -30,12 +30,12 @@ void ToolParentClass::setName(const QString &value)
 {
     name = value;
 }
-vector<ToolSubClass> ToolParentClass::getSubclasses() const
+map<QString, ToolSubClass> ToolParentClass::getSubclasses() const
 {
     return subclasses;
 }
 
-void ToolParentClass::setSubclasses(const vector<ToolSubClass> &value)
+void ToolParentClass::setSubclasses(const map<QString, ToolSubClass> &value)
 {
     subclasses = value;
 }

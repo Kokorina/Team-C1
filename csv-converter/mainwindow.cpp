@@ -12,14 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 	filePath = ui->filePath;
 	targetPath = ui->targetPath;
-    parents.push_back(ToolParentClass(1, "Werkzeug"));
-    parents.push_back(ToolParentClass(2, "Maschinen"));
-    parents.push_back(ToolParentClass(3, "Messgeräte"));
-    parents.push_back(ToolParentClass(4, "Hardware"));
-    parents.push_back(ToolParentClass(5, "Software"));
-    parents.push_back(ToolParentClass(6, "Netzwerktechnik"));
-    parents.push_back(ToolParentClass(7, "Fahrzeuge"));
-    parents.push_back(ToolParentClass(8, "Medien"));
 }
 
 MainWindow::~MainWindow() {
@@ -27,18 +19,19 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_pathButton_clicked() {
-    QString path = QFileDialog::getOpenFileName(0, "CSV-Datei öffnen", QDir::currentPath(), "CSV-Dateien(*.csv *txt)");
+    QString path = QFileDialog::getOpenFileName(0, "TSV-Datei öffnen", QDir::currentPath(), "CSV-Dateien(*.csv *.tsv *txt)");
 	ui->filePath->setText(path);
+	csv = csv.readCsv(ui->filePath->text());
 }
 
 void MainWindow::on_targetPathButton_clicked() {
-	QString path = QFileDialog::getSaveFileName(this, "CSV-Datei speichern", QDir::currentPath(), "CSV-Dateien(*.csv *txt)");
+	QString path = QFileDialog::getSaveFileName(this, "CSV-Datei speichern", QDir::currentPath(), "TSV-Dateien(*.csv *.tsv *.txt)");
 	ui->targetPath->setText(path);
 //	csv.writeToFile(ui->targetPath->text());
 }
 
 void MainWindow::on_convertFile_clicked() {
-    csv = csv.readCsv(ui->filePath->text());
+	//csv = csv.readCsv(ui->filePath->text());
 	//TO-DO: success message
 }
 

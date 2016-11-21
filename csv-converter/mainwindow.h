@@ -22,8 +22,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    vector<ToolParentClass> parents;
-
 private slots:
 	void on_pathButton_clicked();
 	void on_convertFile_clicked();
@@ -40,7 +38,6 @@ private:
 	QPushButton *saveFile;
 
 	CsvFile csv;
-
 };
 
 #endif // MAINWINDOW_H

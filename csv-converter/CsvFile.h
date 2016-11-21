@@ -2,7 +2,9 @@
 
 #include <QString>
 #include <vector>
+#include <map>
 #include "csvRow.h"
+#include "toolparentclass.h"
 
 using namespace std;
 
@@ -28,5 +30,7 @@ private:
     QString path;
     vector<CsvRow> rows;
     QString header;
+
+	map<int, ToolParentClass> parents;
 };
 

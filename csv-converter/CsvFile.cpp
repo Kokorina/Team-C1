@@ -57,14 +57,25 @@ CsvFile CsvFile::readCsv(QString path) {
 
 	file.close();
 
+	//set the toolParentClass objects
+	parents.insert(pair<int, ToolParentClass>(1, ToolParentClass(1, "Werkzeug")));
+	parents.insert(pair<int, ToolParentClass>(2, ToolParentClass(2, "Maschinen")));
+	parents.insert(pair<int, ToolParentClass>(3, ToolParentClass(3, "Messgeräte")));
+	parents.insert(pair<int, ToolParentClass>(4, ToolParentClass(4, "Hardware")));
+	parents.insert(pair<int, ToolParentClass>(5, ToolParentClass(5, "Software")));
+	parents.insert(pair<int, ToolParentClass>(6, ToolParentClass(6, "Netzwerktechnik")));
+	parents.insert(pair<int, ToolParentClass>(7, ToolParentClass(7, "Fahrzeuge")));
+	parents.insert(pair<int, ToolParentClass>(8, ToolParentClass(8, "Medien")));
+
 	//determine order of elements
 	map<int, QString> index;
 	QStringList::const_iterator row;
 	bool first = true;
+	QString separator = "\t";
 
 	for (row = rows.constBegin(); row != rows.constEnd(); ++row) {
 		//future improvement: allow typing a different character in the GUI
-		QString separator = "\t";
+		
 		QStringList fields = row->split(separator);
 		CsvRow line;
 
@@ -73,43 +84,109 @@ CsvFile CsvFile::readCsv(QString path) {
 			for (int i = 0; i < fields.size(); ++i) {
 				index[i] = fields.at(i);
 			}
+			first = false;
+			continue;
 		}
 
 		//read the field data and add it to the csv object.
 		//iterate over fields
 		for (int i = 0; i < fields.size(); ++i) {
-            Tool tool;
             if (i == 0 && index.at(i) == "") {
                 //tool-name
-                tool.setName(fields.at(i));
+				if (fields.at(i) == "----------------------------------------") {
+					//Abbruchbedingung: ab hier kommen unklassifizierte Daten
+					return *this;
+				} else if (fields.at(i) == "" && first == false) {
+					//scheint nicht so ganz zu funktionieren, es kommen noch leere Daten durch
+					continue;
+				}
+				Tool tempTool;
+				tempTool.setName(fields.at(i));
+                line.setTool(tempTool);
 			}
             else if (index.at(i) == "Kategorie") {
-                //(1A) einlesen und aufteilen
+                //"(1A) Subclassname" einlesen und aufteilen
                 int parent = fields.at(i).mid(1,1).toInt();
                 QString subclassId = fields.at(i).mid(2,1);
-                QString subclassName = fields.at(i).right(5);
+				QString subclassName = fields.at(i).right(fields.at(i).length() - 5);
+				map<int, ToolParentClass>::iterator findParent;
 
-                for ( int j=0; j<MainWindow::parents.size(); j++) {
-                    if (parents.at(j).getId()==parent) {
+				//ParentTool identifizieren
+				findParent = parents.find(parent);
+				if (findParent != parents.end()) {
+					ToolParentClass parentTool = findParent->second;
+					map<QString, ToolSubClass> subclasses = parentTool.getSubclasses();
+					map<QString, ToolSubClass>::iterator search;
+					bool exists = false;
+
+					//Index der Subclass in ParentClass suchen
+					search = subclasses.find(subclassId);
+					if (search != subclasses.end())  {
+						//success!
+						exists = true;
+					}
+					//wenn SubClass noch nicht existiert: hinzufügen
+					else {
+						ToolSubClass subclass(subclassId, subclassName);
+						subclasses.insert(pair<QString, ToolSubClass>(subclassId, subclass));
+						findParent->second.setSubclasses(subclasses);
+					}
+
+					search = subclasses.find(subclassId);
+					if (search != subclasses.end())  {
+						//success!
+						subclasses.at(search->first).getTools();
+					}
+
+				}
+
+				/*
+                for ( int j = 0; j < parents.size(); j++) {
+                    if (parents.at(j).getId() == parent) {
                         ToolParentClass parentTool = parents.at(j);
-                        bool exists=false;
-                        for (int k=0; k<parentTool.getSubclasses().size(); k++) {
-                            if (parentTool.getSubclasses().at(k).getId()==subclassId) {
+						map<QString, ToolSubClass> subclasses = parentTool.getSubclasses();
+						map<QString, ToolSubClass>::iterator search;
+
+						bool exists = false;
+
+						search = subclasses.find(subclassId);
+						if (search != subclasses.end())  {
+							//success!
+							exists = true;
+						}
+						else {
+							ToolSubClass subclass(subclassId, subclassName);
+							subclasses.insert(pair<QString, ToolSubClass>(subclassId, subclass));
+						}
+
+						
+                        for (int k=0; k < subclasses.size(); k++) {
+                            if (subclasses.at(k).getId()==subclassId) {
                                 exists=true;
                             }
                         }
+						
                         if (!exists) {
                             ToolSubClass subclass(subclassId, subclassName);
-                            parentTool.getSubclasses().push_back(subclass);
+							subclasses.insert(subclassId, subclassName);
+                            //parentTool.getSubclasses().push_back(subclass);
                             // ÜBERPRÜFEN
                         }
+				
+						search = subclasses.find(subclassId);
+						if (search != subclasses.end())  {
+							//success!
+							subclasses.at(search->first).getTools();
+						}
+
+						
                         for (int k=0; k<parentTool.getSubclasses().size(); k++) {
                             if (parentTool.getSubclasses().at(k).getId()==subclassId) {
                                 parentTool.getSubclasses().at(k).getTools();
                             }
                         }
                     }
-                }
+                }*/
 			}
 		}
 
