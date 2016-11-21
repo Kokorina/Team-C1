@@ -25,7 +25,7 @@ void MainWindow::on_pathButton_clicked() {
 void MainWindow::on_targetPathButton_clicked() {
 	QString path = QFileDialog::getSaveFileName(this, "CSV-Datei speichern", QDir::currentPath(), "CSV-Dateien(*.csv *txt)");
 	ui->targetPath->setText(path);
-	csv.writeToFile(ui->targetPath->text());
+//	csv.writeToFile(ui->targetPath->text());
 }
 
 void MainWindow::on_convertFile_clicked() {
@@ -34,6 +34,6 @@ void MainWindow::on_convertFile_clicked() {
 }
 
 void MainWindow::on_saveFile_clicked() {
-    csv.writeToFile(ui->targetPath->text());
+//    csv.writeToFile(ui->targetPath->text());
 	//TO-DO: success message
 }

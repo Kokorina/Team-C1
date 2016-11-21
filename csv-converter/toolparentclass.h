@@ -5,6 +5,8 @@
 #include <vector>
 #include "toolsubclass.h"
 
+using namespace std;
+
 class ToolParentClass
 {
 public:

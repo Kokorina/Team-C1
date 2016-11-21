@@ -1,6 +1,7 @@
 #ifndef TOOLSUBCLASS_H
 #define TOOLSUBCLASS_H
 
+#include <QString>
 
 class ToolSubClass
 {
