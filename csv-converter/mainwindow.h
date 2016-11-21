@@ -4,7 +4,11 @@
 #include <QMainWindow>
 #include <QLineEdit>
 #include <qpushbutton.h>
+#include <vector>
 #include "CsvFile.h"
+#include "toolparentclass.h"
+
+using namespace std;
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +21,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    vector<ToolParentClass> parents;
 
 private slots:
 	void on_pathButton_clicked();
@@ -34,6 +40,7 @@ private:
 	QPushButton *saveFile;
 
 	CsvFile csv;
+
 };
 
 #endif // MAINWINDOW_H

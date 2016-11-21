@@ -11,6 +11,7 @@ class ToolParentClass
 {
 public:
     ToolParentClass();
+    ToolParentClass(int id, QString name);
 
     int getId() const;
     void setId(int value);

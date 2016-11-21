@@ -4,12 +4,19 @@ ToolSubClass::ToolSubClass()
 {
 
 }
-char ToolSubClass::getId() const
+
+ToolSubClass::ToolSubClass(QString id, QString name)
+{
+    this->id=id;
+    this->name=name;
+}
+
+QString ToolSubClass::getId() const
 {
     return id;
 }
 
-void ToolSubClass::setId(char value)
+void ToolSubClass::setId(QString value)
 {
     id = value;
 }
@@ -22,6 +29,16 @@ void ToolSubClass::setName(const QString &value)
 {
     name = value;
 }
+vector<Tool> ToolSubClass::getTools() const
+{
+    return tools;
+}
+
+void ToolSubClass::setTools(const vector<Tool> &value)
+{
+    tools = value;
+}
+
 
 
 

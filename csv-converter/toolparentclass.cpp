@@ -4,6 +4,14 @@ ToolParentClass::ToolParentClass()
 {
 
 }
+
+ToolParentClass::ToolParentClass(int id, QString name)
+{
+    this->id=id;
+    this->name=name;
+
+}
+
 int ToolParentClass::getId() const
 {
     return id;

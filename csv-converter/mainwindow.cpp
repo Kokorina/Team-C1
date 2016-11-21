@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QLineEdit>
 #include <qfiledialog.h>
+#include "toolparentclass.h"
 
 using namespace std;
 
@@ -11,6 +12,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 	filePath = ui->filePath;
 	targetPath = ui->targetPath;
+    parents.push_back(ToolParentClass(1, "Werkzeug"));
+    parents.push_back(ToolParentClass(2, "Maschinen"));
+    parents.push_back(ToolParentClass(3, "Messgeräte"));
+    parents.push_back(ToolParentClass(4, "Hardware"));
+    parents.push_back(ToolParentClass(5, "Software"));
+    parents.push_back(ToolParentClass(6, "Netzwerktechnik"));
+    parents.push_back(ToolParentClass(7, "Fahrzeuge"));
+    parents.push_back(ToolParentClass(8, "Medien"));
 }
 
 MainWindow::~MainWindow() {

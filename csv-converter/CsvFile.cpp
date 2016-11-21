@@ -6,6 +6,7 @@
 #include "tool.h"
 #include "toolparentclass.h"
 #include "toolsubclass.h"
+#include "mainwindow.h"
 
 CsvFile::CsvFile() {
 }
@@ -77,11 +78,38 @@ CsvFile CsvFile::readCsv(QString path) {
 		//read the field data and add it to the csv object.
 		//iterate over fields
 		for (int i = 0; i < fields.size(); ++i) {
-            if (first == true && index.at(i) == "") {
+            Tool tool;
+            if (i == 0 && index.at(i) == "") {
                 //tool-name
+                tool.setName(fields.at(i));
 			}
-            else if (index.at(i) == "Nummer") {
+            else if (index.at(i) == "Kategorie") {
                 //(1A) einlesen und aufteilen
+                int parent = fields.at(i).mid(1,1).toInt();
+                QString subclassId = fields.at(i).mid(2,1);
+                QString subclassName = fields.at(i).right(5);
+
+                for ( int j=0; j<MainWindow::parents.size(); j++) {
+                    if (parents.at(j).getId()==parent) {
+                        ToolParentClass parentTool = parents.at(j);
+                        bool exists=false;
+                        for (int k=0; k<parentTool.getSubclasses().size(); k++) {
+                            if (parentTool.getSubclasses().at(k).getId()==subclassId) {
+                                exists=true;
+                            }
+                        }
+                        if (!exists) {
+                            ToolSubClass subclass(subclassId, subclassName);
+                            parentTool.getSubclasses().push_back(subclass);
+                            // ÜBERPRÜFEN
+                        }
+                        for (int k=0; k<parentTool.getSubclasses().size(); k++) {
+                            if (parentTool.getSubclasses().at(k).getId()==subclassId) {
+                                parentTool.getSubclasses().at(k).getTools();
+                            }
+                        }
+                    }
+                }
 			}
 		}
 
