@@ -50,6 +50,7 @@ CsvFile CsvFile::readCsv(QString path) {
 	}
 
 	QTextStream text(&file);
+	text.setCodec("UTF-8");
 	QStringList rows;
 
 	while (!text.atEnd())
@@ -96,15 +97,18 @@ CsvFile CsvFile::readCsv(QString path) {
 				if (fields.at(i) == "----------------------------------------") {
 					//Abbruchbedingung: ab hier kommen unklassifizierte Daten
 					return *this;
-				} else if (fields.at(i) == "" && first == false) {
-					//scheint nicht so ganz zu funktionieren, es kommen noch leere Daten durch
-					continue;
+				} else if (fields.at(i) == "") {
+					break;
 				}
 				Tool tempTool;
 				tempTool.setName(fields.at(i));
                 line.setTool(tempTool);
 			}
             else if (index.at(i) == "Kategorie") {
+				if (fields.at(i) == "") {
+					break;
+				}
+
                 //"(1A) Subclassname" einlesen und aufteilen
                 int parent = fields.at(i).mid(1,1).toInt();
                 QString subclassId = fields.at(i).mid(2,1);
@@ -131,13 +135,17 @@ CsvFile CsvFile::readCsv(QString path) {
 						subclasses.insert(pair<QString, ToolSubClass>(subclassId, subclass));
 						findParent->second.setSubclasses(subclasses);
 					}
-
-					search = subclasses.find(subclassId);
-					if (search != subclasses.end())  {
-						//success!
-						subclasses.at(search->first).getTools();
+					if (exists == false) {
+						search = subclasses.find(subclassId);
 					}
 
+					//das Tool in der SubClass referenzieren
+					if (line.getTool().getName() != "") {
+						vector<Tool> tools = subclasses.at(search->first).getTools();
+						tools.push_back(line.getTool());
+						subclasses.at(search->first).setTools(tools);
+						findParent->second.setSubclasses(subclasses);
+					}
 				}
 
 				/*
@@ -191,7 +199,7 @@ CsvFile CsvFile::readCsv(QString path) {
 		}
 
 		//push line into csv vector
-		if (first == false) {
+		if (first == false && line.getTool().getName() != "") {
 			this->addRow(line);
 		}
 		first = false;
