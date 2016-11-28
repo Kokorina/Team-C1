@@ -104,6 +104,11 @@ CsvFile CsvFile::readCsv(QString path) {
 				tempTool.setName(fields.at(i));
                 line.setTool(tempTool);
 			}
+            else if (index.at(i) == "Kontext (SteA-Text)") {
+                Tool tempTool=line.getTool();
+                tempTool.setKontext(fields.at(i));
+                line.setTool(tempTool);
+            }
             else if (index.at(i) == "Kategorie") {
 				if (fields.at(i) == "") {
 					break;
@@ -114,6 +119,8 @@ CsvFile CsvFile::readCsv(QString path) {
                 QString subclassId = fields.at(i).mid(2,1);
 				QString subclassName = fields.at(i).right(fields.at(i).length() - 5);
 				map<int, ToolParentClass>::iterator findParent;
+                line.setParent(parent);
+                line.setSubClass(subclassId);
 
 				//ParentTool identifizieren
 				findParent = parents.find(parent);
@@ -147,54 +154,6 @@ CsvFile CsvFile::readCsv(QString path) {
 						findParent->second.setSubclasses(subclasses);
 					}
 				}
-
-				/*
-                for ( int j = 0; j < parents.size(); j++) {
-                    if (parents.at(j).getId() == parent) {
-                        ToolParentClass parentTool = parents.at(j);
-						map<QString, ToolSubClass> subclasses = parentTool.getSubclasses();
-						map<QString, ToolSubClass>::iterator search;
-
-						bool exists = false;
-
-						search = subclasses.find(subclassId);
-						if (search != subclasses.end())  {
-							//success!
-							exists = true;
-						}
-						else {
-							ToolSubClass subclass(subclassId, subclassName);
-							subclasses.insert(pair<QString, ToolSubClass>(subclassId, subclass));
-						}
-
-						
-                        for (int k=0; k < subclasses.size(); k++) {
-                            if (subclasses.at(k).getId()==subclassId) {
-                                exists=true;
-                            }
-                        }
-						
-                        if (!exists) {
-                            ToolSubClass subclass(subclassId, subclassName);
-							subclasses.insert(subclassId, subclassName);
-                            //parentTool.getSubclasses().push_back(subclass);
-                            // ÜBERPRÜFEN
-                        }
-				
-						search = subclasses.find(subclassId);
-						if (search != subclasses.end())  {
-							//success!
-							subclasses.at(search->first).getTools();
-						}
-
-						
-                        for (int k=0; k<parentTool.getSubclasses().size(); k++) {
-                            if (parentTool.getSubclasses().at(k).getId()==subclassId) {
-                                parentTool.getSubclasses().at(k).getTools();
-                            }
-                        }
-                    }
-                }*/
 			}
 		}
 

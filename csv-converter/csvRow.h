@@ -1,6 +1,6 @@
 #pragma once
 
-#include <qstring.h>
+#include <QString>
 #include "tool.h"
 
 class CsvRow
@@ -12,7 +12,15 @@ public:
 	Tool getTool();
 	void setTool(Tool value);
 
+    QString getSubClass() const;
+    void setSubClass(const QString &value);
+
+    int getParent() const;
+    void setParent(int value);
+
 private:
-	Tool tool;
+    Tool tool;
+    int parent;
+    QString subClass;
 };
 
