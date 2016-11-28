@@ -131,7 +131,7 @@ CsvFile CsvFile::readCsv(QString path) {
 					}
 					//wenn SubClass noch nicht existiert: hinzufügen
 					else {
-						ToolSubClass subclass(subclassId, subclassName);
+                        ToolSubClass subclass(subclassId, subclassName);
 						subclasses.insert(pair<QString, ToolSubClass>(subclassId, subclass));
 						findParent->second.setSubclasses(subclasses);
 					}
