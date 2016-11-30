@@ -105,9 +105,41 @@ CsvFile CsvFile::readCsv(QString path) {
                 line.setTool(tempTool);
 			}
             else if (index.at(i) == "Kontext (SteA-Text)") {
-                Tool tempTool=line.getTool();
-                tempTool.setKontext(fields.at(i));
-                line.setTool(tempTool);
+                //ParentTool identifizieren
+                map<int, ToolParentClass>::iterator findParent;
+
+                findParent = parents.find(line.getParent());
+                if (findParent != parents.end()) {
+                    ToolParentClass parentTool = findParent->second;
+                    map<QString, ToolSubClass> subclasses = parentTool.getSubclasses();
+                    map<QString, ToolSubClass>::iterator search;
+
+                    //Index der Subclass in ParentClass suchen
+                    search = subclasses.find(line.getSubClass());
+                    if (search != subclasses.end())  {
+                        search = subclasses.find(line.getSubClass());
+                    }
+
+                    //das Tool in der SubClass referenzieren
+                    if (line.getTool().getName() != "") {
+                        vector<Tool> tools = subclasses.at(search->first).getTools();
+
+                        for (unsigned j=0; j<tools.size(); j++) {
+                            Tool tempTool=tools.at(j);
+                            if (tempTool.getName()==line.getTool().getName()) {
+                                tempTool.setKontext(fields.at(i));
+                                tools.at(j)=tempTool;
+                                break;
+                            }
+                        }
+                        subclasses.at(search->first).setTools(tools);
+                        findParent->second.setSubclasses(subclasses);
+                    }
+                }
+
+                //Tool tempTool=line.getTool();
+                //tempTool.setKontext(fields.at(i));
+                //line.setTool(tempTool);
             }
             else if (index.at(i) == "Kategorie") {
 				if (fields.at(i) == "") {
