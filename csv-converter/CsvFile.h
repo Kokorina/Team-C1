@@ -26,11 +26,13 @@ public:
 	CsvFile readCsv(QString path);
 	void writeToFile(QString path);
 
+	void makeSets(int n);
+
 private:
     QString path;
     vector<CsvRow> rows;
     QString header;
-
 	map<int, ToolParentClass> parents;
+
 };
 

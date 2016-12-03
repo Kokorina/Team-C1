@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QLineEdit>
 #include <qpushbutton.h>
+#include <qspinbox.h>
 #include <vector>
 #include "CsvFile.h"
 #include "toolparentclass.h"
@@ -24,9 +25,6 @@ public:
 
 private slots:
 	void on_pathButton_clicked();
-	void on_convertFile_clicked();
-	void on_targetPathButton_clicked();
-	void on_saveFile_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -36,6 +34,7 @@ private:
 	QLineEdit *targetPath;
 	QPushButton *targetPathButton;
 	QPushButton *saveFile;
+	QSpinBox *numSets;
 
 	CsvFile csv;
 };

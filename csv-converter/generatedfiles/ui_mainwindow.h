@@ -19,6 +19,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
@@ -34,11 +35,9 @@ public:
     QLabel *label_3;
     QLineEdit *filePath;
     QPushButton *pathButton;
-    QPushButton *convertFile;
     QLabel *label_4;
-    QLineEdit *targetPath;
-    QPushButton *saveFile;
-    QPushButton *targetPathButton;
+    QSpinBox *numSets;
+    QLabel *label_5;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -70,21 +69,18 @@ public:
         pathButton = new QPushButton(centralWidget);
         pathButton->setObjectName(QStringLiteral("pathButton"));
         pathButton->setGeometry(QRect(460, 190, 75, 23));
-        convertFile = new QPushButton(centralWidget);
-        convertFile->setObjectName(QStringLiteral("convertFile"));
-        convertFile->setGeometry(QRect(550, 190, 91, 23));
         label_4 = new QLabel(centralWidget);
         label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setGeometry(QRect(30, 240, 47, 13));
-        targetPath = new QLineEdit(centralWidget);
-        targetPath->setObjectName(QStringLiteral("targetPath"));
-        targetPath->setGeometry(QRect(130, 230, 311, 20));
-        saveFile = new QPushButton(centralWidget);
-        saveFile->setObjectName(QStringLiteral("saveFile"));
-        saveFile->setGeometry(QRect(550, 230, 91, 23));
-        targetPathButton = new QPushButton(centralWidget);
-        targetPathButton->setObjectName(QStringLiteral("targetPathButton"));
-        targetPathButton->setGeometry(QRect(460, 230, 75, 23));
+        label_4->setGeometry(QRect(30, 240, 91, 16));
+        numSets = new QSpinBox(centralWidget);
+        numSets->setObjectName(QStringLiteral("numSets"));
+        numSets->setGeometry(QRect(130, 240, 42, 22));
+        numSets->setMinimum(2);
+        numSets->setMaximum(10);
+        numSets->setValue(10);
+        label_5 = new QLabel(centralWidget);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setGeometry(QRect(180, 240, 171, 16));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -109,10 +105,8 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "Instructions go here", 0));
         label_3->setText(QApplication::translate("MainWindow", "Datei w\303\244hlen", 0));
         pathButton->setText(QApplication::translate("MainWindow", "Durchsuchen", 0));
-        convertFile->setText(QApplication::translate("MainWindow", "Konvertieren", 0));
-        label_4->setText(QApplication::translate("MainWindow", "Ziel", 0));
-        saveFile->setText(QApplication::translate("MainWindow", "Speichern", 0));
-        targetPathButton->setText(QApplication::translate("MainWindow", "Durchsuchen", 0));
+        label_4->setText(QApplication::translate("MainWindow", "Kreuzvalidierung:", 0));
+        label_5->setText(QApplication::translate("MainWindow", "Sets bilden", 0));
     } // retranslateUi
 
 };

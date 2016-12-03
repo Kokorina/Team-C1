@@ -3,6 +3,9 @@
 #include <QStringList>
 #include <QTextStream>
 #include <qdebug.h>
+#include <algorithm>
+#include <random>
+#include <chrono>
 #include "tool.h"
 #include "toolparentclass.h"
 #include "toolsubclass.h"
@@ -124,11 +127,12 @@ CsvFile CsvFile::readCsv(QString path) {
                     if (line.getTool().getName() != "") {
                         vector<Tool> tools = subclasses.at(search->first).getTools();
 
-                        for (unsigned j=0; j<tools.size(); j++) {
+                        for (unsigned j = 0; j<tools.size(); j++) {
                             Tool tempTool=tools.at(j);
-                            if (tempTool.getName()==line.getTool().getName()) {
+                            if (tempTool.getName() == line.getTool().getName()) {
                                 tempTool.setKontext(fields.at(i));
-                                tools.at(j)=tempTool;
+                                tools.at(j) = tempTool;
+								line.setTool(tempTool);
                                 break;
                             }
                         }
@@ -196,4 +200,36 @@ CsvFile CsvFile::readCsv(QString path) {
 		first = false;
 	}
 	return *this;
+}
+
+void CsvFile::makeSets(int n) {
+	// Daten mischen
+
+	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	auto re = default_random_engine(seed);
+	shuffle(begin(this->rows), end(this->rows), re);
+	
+	// n Sets aus Trainings- und Testdaten erstellen 
+	for (int i = 1; i < n; ++i) {
+		vector<Tool> testData;
+		vector<Tool> trainingData;
+
+		int setStart = this->rows.size() / n * (i - 1);
+		int setEnd = (this->rows.size() / n * i) - 1;
+
+		for (int j = 0; j < this->rows.size(); ++j) {
+			if (j >= setStart && j <= setEnd) {
+				testData.push_back(this->rows.at(j).getTool());
+			}
+			else {
+				trainingData.push_back(this->rows.at(j).getTool());
+			}
+		}
+
+		//hier müssen die Vektoren entweder weiterverarbeitet oder in einer Datenstruktur abgelegt werden
+
+		//diese Instruktion steht nur hier, damit man einen breakpoint setzen und die Vektoren ansehen kann
+		int z = 0;
+	}
 }

@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow) {
     ui->setupUi(this);
 	filePath = ui->filePath;
-	targetPath = ui->targetPath;
+	numSets = ui->numSets;
 }
 
 MainWindow::~MainWindow() {
@@ -22,20 +22,5 @@ void MainWindow::on_pathButton_clicked() {
     QString path = QFileDialog::getOpenFileName(0, "TSV-Datei öffnen", QDir::currentPath(), "CSV-Dateien(*.csv *.tsv *txt)");
 	ui->filePath->setText(path);
 	csv = csv.readCsv(ui->filePath->text());
-}
-
-void MainWindow::on_targetPathButton_clicked() {
-	QString path = QFileDialog::getSaveFileName(this, "CSV-Datei speichern", QDir::currentPath(), "TSV-Dateien(*.csv *.tsv *.txt)");
-	ui->targetPath->setText(path);
-//	csv.writeToFile(ui->targetPath->text());
-}
-
-void MainWindow::on_convertFile_clicked() {
-	//csv = csv.readCsv(ui->filePath->text());
-	//TO-DO: success message
-}
-
-void MainWindow::on_saveFile_clicked() {
-//    csv.writeToFile(ui->targetPath->text());
-	//TO-DO: success message
+	csv.makeSets(numSets->value());
 }
