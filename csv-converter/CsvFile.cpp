@@ -203,27 +203,36 @@ CsvFile CsvFile::readCsv(QString path) {
 }
 
 void CsvFile::makeSets(int n) {
-	// Daten mischen
+    //Daten ohne Kontext filtern
+    //ACHTUNG! Wenn Klasiifizierung in gesonderter Methode stattfindet, gehört dieser Code dahin!
+    vector<CsvRow> data = this->rows;
 
+    for (int i = 0; i < data.size(); ++i) {
+        if (data.at(i).getTool().getKontext() == "NA") {
+            data.erase(data.begin() + i);
+            --i;
+        }
+    }
+    // Daten mischen
 	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	auto re = default_random_engine(seed);
-	shuffle(begin(this->rows), end(this->rows), re);
+    shuffle(begin(data), end(data), re);
 	
 	// n Sets aus Trainings- und Testdaten erstellen 
 	for (int i = 1; i < n; ++i) {
 		vector<Tool> testData;
 		vector<Tool> trainingData;
 
-		int setStart = this->rows.size() / n * (i - 1);
-		int setEnd = (this->rows.size() / n * i) - 1;
+        int setStart = data.size() / n * (i - 1);
+        int setEnd = (data.size() / n * i) - 1;
 
-		for (int j = 0; j < this->rows.size(); ++j) {
+        for (int j = 0; j < data.size(); ++j) {
 			if (j >= setStart && j <= setEnd) {
-				testData.push_back(this->rows.at(j).getTool());
+                testData.push_back(data.at(j).getTool());
 			}
 			else {
-				trainingData.push_back(this->rows.at(j).getTool());
+                trainingData.push_back(data.at(j).getTool());
 			}
 		}
 
