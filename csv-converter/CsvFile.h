@@ -26,6 +26,7 @@ public:
 	CsvFile readCsv(QString path);
 	void writeToFile(QString path);
 
+	void makeBoWs();
 	void makeSets(int n);
 
 private:
@@ -33,6 +34,6 @@ private:
     vector<CsvRow> rows;
     QString header;
 	map<int, ToolParentClass> parents;
-
+	multimap<int, map<QString, int>> classBoWs;
 };
 

@@ -202,6 +202,52 @@ CsvFile CsvFile::readCsv(QString path) {
 	return *this;
 }
 
+void CsvFile::makeBoWs() {
+	multimap<int, map<QString, int>> BoWs;
+	multimap<int, map<QString, int>>::iterator searchBoWs;
+	map<QString, int>::iterator searchWords;
+	vector<CsvRow> data = this->rows;
+
+	for (int i = 0; i < data.size(); ++i) {
+		int classId = data.at(i).getParent();
+		map<QString, int> wordCount;
+
+		//parent finden und die WordList rausholen
+		searchBoWs = BoWs.find(classId);
+		if (searchBoWs != BoWs.end()) {
+			wordCount = searchBoWs->second;
+		}
+		else { //falls die ParentClassID noch nicht in der Hauptmap existiert: erzeugen
+			BoWs.insert(pair<int, map<QString, int>>(classId, wordCount));
+		}
+		
+		//Kontexte tokenisieren
+		QString context = data.at(i).getTool().getKontext();
+		QStringList wordList = context.split(QRegExp("\\W+"));
+
+		//Worte in der wordCount in WordList erfassen und zählen
+		QStringList::iterator it;
+		for (it = wordList.begin(); it != wordList.end(); ++it) {
+			searchWords = wordCount.find((*it));
+
+			if (searchWords != wordCount.end()) {
+				wordCount.at(searchWords->first) += 1;
+			}
+			else {
+				wordCount.insert(pair<QString, int>((*it), 1));
+			}
+		}
+
+		//WordList der ParentClass zuweisen
+		searchBoWs = BoWs.find(classId);
+		searchBoWs->second = wordCount;
+	}
+
+	//ACHTUNG! Ergebnisse sind nicht normalisiert, unsinnige Zeichen wie ")" o.ä. sind auch drin. Ergebnisse definitv nicht perfekt.
+	this->classBoWs = BoWs;
+}
+
+
 void CsvFile::makeSets(int n) {
     //Daten ohne Kontext filtern
     //ACHTUNG! Wenn Klasiifizierung in gesonderter Methode stattfindet, gehört dieser Code dahin!
@@ -213,6 +259,9 @@ void CsvFile::makeSets(int n) {
             --i;
         }
     }
+
+	this->makeBoWs();
+
     // Daten mischen
 	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();

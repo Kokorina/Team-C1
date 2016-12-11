@@ -22,5 +22,7 @@ void MainWindow::on_pathButton_clicked() {
     QString path = QFileDialog::getOpenFileName(0, "TSV-Datei öffnen", QDir::currentPath(), "CSV-Dateien(*.csv *.tsv *txt)");
 	ui->filePath->setText(path);
 	csv = csv.readCsv(ui->filePath->text());
+
+	//csv.makeBoWs();
 	csv.makeSets(numSets->value());
 }
