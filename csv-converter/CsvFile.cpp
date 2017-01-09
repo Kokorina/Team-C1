@@ -70,7 +70,7 @@ CsvFile CsvFile::readCsv(QString path) {
 	parents.insert(pair<int, ToolParentClass>(6, ToolParentClass(6, "Netzwerktechnik")));
 	parents.insert(pair<int, ToolParentClass>(7, ToolParentClass(7, "Fahrzeuge")));
 	parents.insert(pair<int, ToolParentClass>(8, ToolParentClass(8, "Medien")));
-
+	
 	//determine order of elements
 	map<int, QString> index;
 	QStringList::const_iterator row;
@@ -202,15 +202,108 @@ CsvFile CsvFile::readCsv(QString path) {
 	return *this;
 }
 
-void CsvFile::makeBoWs() {
+
+void CsvFile::writeToFile(QString path) {
+	//open file
+	QString pathData = path.insert(path.indexOf(".tsv"), "-data");
+	QFile file(pathData);
+
+	//create a second file for the labels
+	QString pathLabels = path.insert(path.indexOf(".tsv"), "-labels");
+	writeLabelFile(pathLabels);
+
+	if (!file.open(QIODevice::WriteOnly)) {
+		qDebug() << file.errorString();
+	}
+
+	QTextStream out(&file);
+	out.setGenerateByteOrderMark(true);
+	out.setCodec("UTF-8");
+
+	vector<CsvRow>::iterator row;
+	for (row = this->rows.begin(); row < this->rows.end(); ++row) {
+		if (row->getTool().getKontext() == "NA") {
+			continue;
+		}
+		out << row->getTool().getName() << " " << row->getTool().getKontext() << endl;
+	}
+	file.close();
+}
+
+
+void CsvFile::writeVectorFile(QString path) {
+	//open file
+	QString pathData = path.insert(path.indexOf(".tsv"), "-data");
+	QFile file(pathData);
+
+	if (!file.open(QIODevice::WriteOnly)) {
+		qDebug() << file.errorString();
+	}
+
+	QTextStream out(&file);
+	out.setGenerateByteOrderMark(true);
+	out.setCodec("UTF-8");
+
+	vector<CsvRow>::iterator row;
+	for (row = this->rows.begin(); row < this->rows.end(); ++row) {
+		if (row->getTool().getKontext() == "NA") {
+			continue;
+		}
+		//out << row->getTool().getName() << " " << row->getTool().getKontext() << endl;
+	}
+	file.close();
+}
+
+
+void CsvFile::writeLabelFile(QString pathLabels) {
+	//open file
+	QFile file(pathLabels);
+
+	if (!file.open(QIODevice::WriteOnly)) {
+		qDebug() << file.errorString();
+	}
+
+	QTextStream out(&file);
+	out.setGenerateByteOrderMark(true);
+	out.setCodec("UTF-8");
+
+	vector<CsvRow>::iterator row;
+	for (row = this->rows.begin(); row < this->rows.end(); ++row) {
+		if (row->getTool().getKontext() == "NA") {
+			continue;
+		}
+		out << row->getParent() << endl;
+	}
+	file.close();
+}
+
+void CsvFile::randomize() {
+	// Daten mischen
+	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	auto re = default_random_engine(seed);
+	shuffle(begin(this->rows), end(this->rows), re);
+}
+
+
+void CsvFile::makeClassBoWs() {
 	multimap<int, map<QString, int>> BoWs;
 	multimap<int, map<QString, int>>::iterator searchBoWs;
-	map<QString, int>::iterator searchWords;
+	map<QString, int>::iterator searchWords, it;
 	vector<CsvRow> data = this->rows;
 
 	for (int i = 0; i < data.size(); ++i) {
 		int classId = data.at(i).getParent();
-		map<QString, int> wordCount;
+		//map<QString, int> wordCount;
+
+		//EVTL ABWANDLUNG: anstelle von wordCount totalBoW als Grundlage nutzen und dort alle seconds auf 0 setzen. Dann höher zählen. ->Vergleichbarkeit gewährleistet, alle Worte drin
+
+
+		map<QString, int> wordCount = totalBoW;
+		
+		for (it = wordCount.begin(); it != wordCount.end(); ++it) {
+			it->second = 0;
+		}
 
 		//parent finden und die WordList rausholen
 		searchBoWs = BoWs.find(classId);
@@ -247,6 +340,37 @@ void CsvFile::makeBoWs() {
 	this->classBoWs = BoWs;
 }
 
+void CsvFile::makeTotalBoW() {
+	map<QString, int> wordCount;
+	map<QString, int>::iterator searchBoWs;
+	map<QString, int>::iterator searchWords;
+	
+	vector<CsvRow> data = this->rows;
+
+	for (int i = 0; i < data.size(); ++i) {
+		
+
+		//Kontexte tokenisieren
+		QString context = data.at(i).getTool().getKontext();
+		QStringList wordList = context.split(QRegExp("\\W+"));
+
+		//Worte in der wordCount in WordList erfassen und zählen
+		QStringList::iterator it;
+		for (it = wordList.begin(); it != wordList.end(); ++it) {
+			searchWords = wordCount.find((*it));
+
+			if (searchWords != wordCount.end()) {
+				wordCount.at(searchWords->first) += 1;
+			}
+			else {
+				wordCount.insert(pair<QString, int>((*it), 1));
+			}
+		}
+	}
+
+	//ACHTUNG! Ergebnisse sind nicht normalisiert, unsinnige Zeichen wie ")" o.ä. sind auch drin. Ergebnisse definitv nicht perfekt.
+	this->totalBoW = wordCount;
+}
 
 void CsvFile::makeSets(int n) {
     //Daten ohne Kontext filtern
@@ -260,13 +384,7 @@ void CsvFile::makeSets(int n) {
         }
     }
 
-	this->makeBoWs();
-
-    // Daten mischen
-	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	auto re = default_random_engine(seed);
-    shuffle(begin(data), end(data), re);
+	this->makeClassBoWs();
 	
 	// n Sets aus Trainings- und Testdaten erstellen 
 	for (int i = 1; i < n; ++i) {

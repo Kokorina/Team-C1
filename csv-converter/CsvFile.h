@@ -25,8 +25,12 @@ public:
 
 	CsvFile readCsv(QString path);
 	void writeToFile(QString path);
+	void writeLabelFile(QString pathLabels);
+	void writeVectorFile(QString path);
 
-	void makeBoWs();
+	void randomize();
+	void makeClassBoWs();
+	void makeTotalBoW();
 	void makeSets(int n);
 
 private:
@@ -35,5 +39,6 @@ private:
     QString header;
 	map<int, ToolParentClass> parents;
 	multimap<int, map<QString, int>> classBoWs;
+	map<QString, int> totalBoW;
 };
 
