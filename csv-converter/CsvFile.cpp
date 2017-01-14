@@ -292,18 +292,12 @@ void CsvFile::makeClassBoWs() {
 	map<QString, int>::iterator searchWords, it;
 	vector<CsvRow> data = this->rows;
 
+	map<QString, int> wordCount = this->baseBoW;
+
 	for (int i = 0; i < data.size(); ++i) {
 		int classId = data.at(i).getParent();
-		//map<QString, int> wordCount;
 
-		//EVTL ABWANDLUNG: anstelle von wordCount totalBoW als Grundlage nutzen und dort alle seconds auf 0 setzen. Dann höher zählen. ->Vergleichbarkeit gewährleistet, alle Worte drin
-
-
-		map<QString, int> wordCount = totalBoW;
-		
-		for (it = wordCount.begin(); it != wordCount.end(); ++it) {
-			it->second = 0;
-		}
+		//map<QString, int> wordCount = this->baseBoW;
 
 		//parent finden und die WordList rausholen
 		searchBoWs = BoWs.find(classId);
@@ -370,6 +364,18 @@ void CsvFile::makeTotalBoW() {
 
 	//ACHTUNG! Ergebnisse sind nicht normalisiert, unsinnige Zeichen wie ")" o.ä. sind auch drin. Ergebnisse definitv nicht perfekt.
 	this->totalBoW = wordCount;
+	makeBaseBoW();
+}
+
+void CsvFile::makeBaseBoW() {
+	map<QString, int>::iterator it;
+	map<QString, int> baseBoW = totalBoW;
+
+	for (it = baseBoW.begin(); it != baseBoW.end(); ++it) {
+		it->second = 0;
+	}
+
+	this->baseBoW = baseBoW;
 }
 
 void CsvFile::makeSets(int n) {

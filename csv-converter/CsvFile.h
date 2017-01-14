@@ -32,6 +32,7 @@ public:
 	void makeClassBoWs();
 	void makeTotalBoW();
 	void makeSets(int n);
+	void makeBaseBoW();
 
 private:
     QString path;
@@ -40,5 +41,7 @@ private:
 	map<int, ToolParentClass> parents;
 	multimap<int, map<QString, int>> classBoWs;
 	map<QString, int> totalBoW;
+	map<QString, int> baseBoW;
+
 };
 
