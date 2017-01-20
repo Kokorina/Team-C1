@@ -25,8 +25,11 @@ void MainWindow::on_pathButton_clicked() {
 	csv.randomize();
 	csv.writeToFile(path);
 	
+	csv.filterEmptyContexts();
 	csv.makeTotalBoW();
 	csv.makeClassBoWs();
+	csv.addFeatures();
+	csv.writeVectorFile(path);
 
 	//csv.makeSets(numSets->value());
 }

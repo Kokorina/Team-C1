@@ -28,11 +28,13 @@ public:
 	void writeLabelFile(QString pathLabels);
 	void writeVectorFile(QString path);
 
+	void filterEmptyContexts();
 	void randomize();
 	void makeClassBoWs();
 	void makeTotalBoW();
 	void makeSets(int n);
 	void makeBaseBoW();
+	void addFeatures();
 
 private:
     QString path;

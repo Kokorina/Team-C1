@@ -36,12 +36,12 @@ void CsvFile::setPath(const QString &value)
 }
 QString CsvFile::getHeader() const
 {
-    return header;
+	return header;
 }
 
 void CsvFile::setHeader(const QString &value)
 {
-    header = value;
+	header = value;
 }
 
 CsvFile CsvFile::readCsv(QString path) {
@@ -70,7 +70,7 @@ CsvFile CsvFile::readCsv(QString path) {
 	parents.insert(pair<int, ToolParentClass>(6, ToolParentClass(6, "Netzwerktechnik")));
 	parents.insert(pair<int, ToolParentClass>(7, ToolParentClass(7, "Fahrzeuge")));
 	parents.insert(pair<int, ToolParentClass>(8, ToolParentClass(8, "Medien")));
-	
+
 	//determine order of elements
 	map<int, QString> index;
 	QStringList::const_iterator row;
@@ -79,7 +79,7 @@ CsvFile CsvFile::readCsv(QString path) {
 
 	for (row = rows.constBegin(); row != rows.constEnd(); ++row) {
 		//future improvement: allow typing a different character in the GUI
-		
+
 		QStringList fields = row->split(separator);
 		CsvRow line;
 
@@ -95,68 +95,69 @@ CsvFile CsvFile::readCsv(QString path) {
 		//read the field data and add it to the csv object.
 		//iterate over fields
 		for (int i = 0; i < fields.size(); ++i) {
-            if (i == 0 && index.at(i) == "") {
-                //tool-name
+			if (i == 0 && index.at(i) == "") {
+				//tool-name
 				if (fields.at(i) == "----------------------------------------") {
 					//Abbruchbedingung: ab hier kommen unklassifizierte Daten
 					return *this;
-				} else if (fields.at(i) == "") {
+				}
+				else if (fields.at(i) == "") {
 					break;
 				}
 				Tool tempTool;
 				tempTool.setName(fields.at(i));
-                line.setTool(tempTool);
+				line.setTool(tempTool);
 			}
-            else if (index.at(i) == "Kontext (SteA-Text)") {
-                //ParentTool identifizieren
-                map<int, ToolParentClass>::iterator findParent;
+			else if (index.at(i) == "Kontext (SteA-Text)") {
+				//ParentTool identifizieren
+				map<int, ToolParentClass>::iterator findParent;
 
-                findParent = parents.find(line.getParent());
-                if (findParent != parents.end()) {
-                    ToolParentClass parentTool = findParent->second;
-                    map<QString, ToolSubClass> subclasses = parentTool.getSubclasses();
-                    map<QString, ToolSubClass>::iterator search;
+				findParent = parents.find(line.getParent());
+				if (findParent != parents.end()) {
+					ToolParentClass parentTool = findParent->second;
+					map<QString, ToolSubClass> subclasses = parentTool.getSubclasses();
+					map<QString, ToolSubClass>::iterator search;
 
-                    //Index der Subclass in ParentClass suchen
-                    search = subclasses.find(line.getSubClass());
-                    if (search != subclasses.end())  {
-                        search = subclasses.find(line.getSubClass());
-                    }
+					//Index der Subclass in ParentClass suchen
+					search = subclasses.find(line.getSubClass());
+					if (search != subclasses.end())  {
+						search = subclasses.find(line.getSubClass());
+					}
 
-                    //das Tool in der SubClass referenzieren
-                    if (line.getTool().getName() != "") {
-                        vector<Tool> tools = subclasses.at(search->first).getTools();
+					//das Tool in der SubClass referenzieren
+					if (line.getTool().getName() != "") {
+						vector<Tool> tools = subclasses.at(search->first).getTools();
 
-                        for (unsigned j = 0; j<tools.size(); j++) {
-                            Tool tempTool=tools.at(j);
-                            if (tempTool.getName() == line.getTool().getName()) {
-                                tempTool.setKontext(fields.at(i));
-                                tools.at(j) = tempTool;
+						for (unsigned j = 0; j < tools.size(); j++) {
+							Tool tempTool = tools.at(j);
+							if (tempTool.getName() == line.getTool().getName()) {
+								tempTool.setKontext(fields.at(i));
+								tools.at(j) = tempTool;
 								line.setTool(tempTool);
-                                break;
-                            }
-                        }
-                        subclasses.at(search->first).setTools(tools);
-                        findParent->second.setSubclasses(subclasses);
-                    }
-                }
+								break;
+							}
+						}
+						subclasses.at(search->first).setTools(tools);
+						findParent->second.setSubclasses(subclasses);
+					}
+				}
 
-                //Tool tempTool=line.getTool();
-                //tempTool.setKontext(fields.at(i));
-                //line.setTool(tempTool);
-            }
-            else if (index.at(i) == "Kategorie") {
+				//Tool tempTool=line.getTool();
+				//tempTool.setKontext(fields.at(i));
+				//line.setTool(tempTool);
+			}
+			else if (index.at(i) == "Kategorie") {
 				if (fields.at(i) == "") {
 					break;
 				}
 
-                //"(1A) Subclassname" einlesen und aufteilen
-                int parent = fields.at(i).mid(1,1).toInt();
-                QString subclassId = fields.at(i).mid(2,1);
+				//"(1A) Subclassname" einlesen und aufteilen
+				int parent = fields.at(i).mid(1, 1).toInt();
+				QString subclassId = fields.at(i).mid(2, 1);
 				QString subclassName = fields.at(i).right(fields.at(i).length() - 5);
 				map<int, ToolParentClass>::iterator findParent;
-                line.setParent(parent);
-                line.setSubClass(subclassId);
+				line.setParent(parent);
+				line.setSubClass(subclassId);
 
 				//ParentTool identifizieren
 				findParent = parents.find(parent);
@@ -174,7 +175,7 @@ CsvFile CsvFile::readCsv(QString path) {
 					}
 					//wenn SubClass noch nicht existiert: hinzufügen
 					else {
-                        ToolSubClass subclass(subclassId, subclassName);
+						ToolSubClass subclass(subclassId, subclassName);
 						subclasses.insert(pair<QString, ToolSubClass>(subclassId, subclass));
 						findParent->second.setSubclasses(subclasses);
 					}
@@ -233,7 +234,7 @@ void CsvFile::writeToFile(QString path) {
 
 void CsvFile::writeVectorFile(QString path) {
 	//open file
-	QString pathData = path.insert(path.indexOf(".tsv"), "-data");
+	QString pathData = path.insert(path.indexOf(".tsv"), "-tfIdf");
 	QFile file(pathData);
 
 	if (!file.open(QIODevice::WriteOnly)) {
@@ -245,15 +246,26 @@ void CsvFile::writeVectorFile(QString path) {
 	out.setCodec("UTF-8");
 
 	vector<CsvRow>::iterator row;
+
 	for (row = this->rows.begin(); row < this->rows.end(); ++row) {
-		if (row->getTool().getKontext() == "NA") {
-			continue;
+		Tool&t = row->getTool();
+
+		//write the file
+		out << t.getName() << " " << row->getParent() << " ";
+		int i = 1;
+		for (pair<const QString, double>& tool : t.getTfIdf()) {
+
+			if (tool.second > 0) {
+				out << i << ":" << tool.second << " ";
+			}
+			++i;
 		}
-		//out << row->getTool().getName() << " " << row->getTool().getKontext() << endl;
+
+		out << endl;
 	}
+
 	file.close();
 }
-
 
 void CsvFile::writeLabelFile(QString pathLabels) {
 	//open file
@@ -277,6 +289,19 @@ void CsvFile::writeLabelFile(QString pathLabels) {
 	file.close();
 }
 
+void CsvFile::filterEmptyContexts() {
+	vector<CsvRow>& data = this->rows;
+	//int c = 0;
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (data.at(i).getTool().getKontext() == "NA") {
+			data.erase(data.begin() + i);
+			--i;
+			//++c;
+		}
+	}
+}
+
 void CsvFile::randomize() {
 	// Daten mischen
 	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
@@ -297,17 +322,17 @@ void CsvFile::makeClassBoWs() {
 	for (int i = 0; i < data.size(); ++i) {
 		int classId = data.at(i).getParent();
 
-		//map<QString, int> wordCount = this->baseBoW;
-
 		//parent finden und die WordList rausholen
 		searchBoWs = BoWs.find(classId);
-		if (searchBoWs != BoWs.end()) {
-			wordCount = searchBoWs->second;
-		}
-		else { //falls die ParentClassID noch nicht in der Hauptmap existiert: erzeugen
+
+		//dafür sorgen, dass search BoWs auf jeden Fall einen Wert hat 
+		if (searchBoWs == BoWs.end()) {
 			BoWs.insert(pair<int, map<QString, int>>(classId, wordCount));
+			searchBoWs = BoWs.find(classId);
 		}
-		
+
+		map<QString, int>& value = searchBoWs->second;
+
 		//Kontexte tokenisieren
 		QString context = data.at(i).getTool().getKontext();
 		QStringList wordList = context.split(QRegExp("\\W+"));
@@ -315,19 +340,18 @@ void CsvFile::makeClassBoWs() {
 		//Worte in der wordCount in WordList erfassen und zählen
 		QStringList::iterator it;
 		for (it = wordList.begin(); it != wordList.end(); ++it) {
-			searchWords = wordCount.find((*it));
+			searchWords = value.find((*it));
 
-			if (searchWords != wordCount.end()) {
-				wordCount.at(searchWords->first) += 1;
+			if (searchWords != searchBoWs->second.end()) {
+				value.at(searchWords->first) += 1;
 			}
 			else {
-				wordCount.insert(pair<QString, int>((*it), 1));
+				value.insert(pair<QString, int>((*it), 1));
 			}
 		}
 
 		//WordList der ParentClass zuweisen
-		searchBoWs = BoWs.find(classId);
-		searchBoWs->second = wordCount;
+		//searchBoWs->second = wordCount;
 	}
 
 	//ACHTUNG! Ergebnisse sind nicht normalisiert, unsinnige Zeichen wie ")" o.ä. sind auch drin. Ergebnisse definitv nicht perfekt.
@@ -338,11 +362,10 @@ void CsvFile::makeTotalBoW() {
 	map<QString, int> wordCount;
 	map<QString, int>::iterator searchBoWs;
 	map<QString, int>::iterator searchWords;
-	
+
 	vector<CsvRow> data = this->rows;
 
 	for (int i = 0; i < data.size(); ++i) {
-		
 
 		//Kontexte tokenisieren
 		QString context = data.at(i).getTool().getKontext();
@@ -379,33 +402,35 @@ void CsvFile::makeBaseBoW() {
 }
 
 void CsvFile::makeSets(int n) {
-    //Daten ohne Kontext filtern
-    //ACHTUNG! Wenn Klasiifizierung in gesonderter Methode stattfindet, gehört dieser Code dahin!
-    vector<CsvRow> data = this->rows;
+	//Daten ohne Kontext filtern
+	//ACHTUNG! Wenn Klassifizierung in gesonderter Methode stattfindet, gehört dieser Code dahin!
+	/* vector<CsvRow> data = this->rows;
 
-    for (int i = 0; i < data.size(); ++i) {
-        if (data.at(i).getTool().getKontext() == "NA") {
-            data.erase(data.begin() + i);
-            --i;
-        }
-    }
+	 for (int i = 0; i < data.size(); ++i) {
+	 if (data.at(i).getTool().getKontext() == "NA") {
+	 data.erase(data.begin() + i);
+	 --i;
+	 }
+	 }*/
+
+	vector<CsvRow> data = this->rows;
 
 	this->makeClassBoWs();
-	
+
 	// n Sets aus Trainings- und Testdaten erstellen 
 	for (int i = 1; i < n; ++i) {
 		vector<Tool> testData;
 		vector<Tool> trainingData;
 
-        int setStart = data.size() / n * (i - 1);
-        int setEnd = (data.size() / n * i) - 1;
+		int setStart = data.size() / n * (i - 1);
+		int setEnd = (data.size() / n * i) - 1;
 
-        for (int j = 0; j < data.size(); ++j) {
+		for (int j = 0; j < data.size(); ++j) {
 			if (j >= setStart && j <= setEnd) {
-                testData.push_back(data.at(j).getTool());
+				testData.push_back(data.at(j).getTool());
 			}
 			else {
-                trainingData.push_back(data.at(j).getTool());
+				trainingData.push_back(data.at(j).getTool());
 			}
 		}
 
@@ -414,4 +439,38 @@ void CsvFile::makeSets(int n) {
 		//diese Instruktion steht nur hier, damit man einen breakpoint setzen und die Vektoren ansehen kann
 		int z = 0;
 	}
+}
+
+//Problem: Tf-Idf wird nicht zurückgespeichert.
+void CsvFile::addFeatures() {
+
+	for (int i = 0; i < this->rows.size(); ++i) {
+		Tool& t = rows[i].getTool();
+		t.calculateTfIdf(baseBoW, classBoWs, rows[i].getParent());
+		rows[i].setTool(t);
+	}
+
+
+	/*
+	map<int, ToolParentClass>::iterator itParents;
+	map<QString, ToolSubClass>::iterator itSubclass;
+
+	for (itParents = this->parents.begin(); itParents != this->parents.end(); ++itParents) {
+	map<QString, ToolSubClass>& subclasses = itParents->second.getSubclasses();
+	ToolParentClass& parentClass = itParents->second;
+
+	for (itSubclass = subclasses.begin(); itSubclass != subclasses.end(); ++itSubclass) {
+	ToolSubClass& subclass = itSubclass->second;
+	vector<Tool>& tools = subclass.getTools();
+	//for (int i = 0; i < tools.size(); ++i) {
+	for (int i = 0; i < rows.size(); ++i) {
+	//add tf-idf frequency
+	//Tool& t = tools[i];
+	Tool& t = rows[i].getTool();
+	t.calculateTfIdf(baseBoW, classBoWs, itParents->first);
+	rows[i].setTool(t);
+	//t.setTfIdf(t.calculateTfIdf(baseBoW, classBoWs, itParents->first));
+	}
+	}
+	}*/
 }

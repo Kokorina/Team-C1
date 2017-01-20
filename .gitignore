@@ -104,3 +104,5 @@ ipch/
 *.vspx
 *.sap
 *.obj
+*.tlog
+*.obj
