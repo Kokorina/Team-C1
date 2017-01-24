@@ -1,4 +1,6 @@
 #include "toolparentclass.h"
+#include <numeric>
+#include <utility>
 
 ToolParentClass::ToolParentClass()
 {
@@ -40,6 +42,11 @@ void ToolParentClass::setSubclasses(const map<QString, ToolSubClass> &value)
     subclasses = value;
 }
 
-
+int ToolParentClass::getTotalWords() {
+	return totalWords;
+}
+void ToolParentClass::calculateTotalWords() {
+	totalWords = accumulate(begin(BoW), std::end(BoW), 0, [](const int previous, const std::pair<QString, int>& p) { return previous + p.second; });
+}
 
 

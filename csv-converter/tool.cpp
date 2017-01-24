@@ -2,6 +2,7 @@
 #include <QStringList>
 #include <cmath>
 
+
 Tool::Tool()
 {
 
@@ -54,6 +55,7 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow,  multimap<i
 		QStringList::iterator it;
 		for (it = wordList.begin(); it != wordList.end(); ++it) {
 			int wordFrequencyInClass = 0;
+			int allWordsInClass = 0;
 			int classesWithWord = 0;
 			map<QString, int>::iterator searchWords = parentClassBoW.find((*it));
 
@@ -62,6 +64,10 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow,  multimap<i
 				wordFrequencyInClass = searchWords->second;
 			}
 
+			//Die Häufigkeit aller Wörter der Klasse abrufen
+			//IRGENDWO ABSPEICHERN! NICHT JEDES MAL NEU MACHEN! -> Property von ToolParentClass!
+
+
 			//durch die Klassen loopen und zählen, in wie vielen das Wort vorkommt
 			map<QString, int>::iterator searchInClass;
 			for (itParents = classBoWs.begin(); itParents != classBoWs.end(); ++itParents) {
@@ -69,11 +75,13 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow,  multimap<i
 
 				if (searchInClass != itParents->second.end()) {
 					classesWithWord += 1;
+					continue;
 				}
 			}
 
 			//tf-idf berechnen
-			tfIdf[searchWords->first] = (wordFrequencyInClass/wordList.size()) / log(8 / classesWithWord + 1);
+			// !!! nicht durch wordlist-size, sondern alle Wörter der Klasse !!!
+			tfIdf[searchWords->first] = (wordFrequencyInClass/allWordsInClass) / log(8 / (classesWithWord + 1));
 		}
 		return tfIdf;
 	}
