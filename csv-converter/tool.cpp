@@ -1,7 +1,7 @@
 #include "tool.h"
 #include <QStringList>
 #include <cmath>
-
+#include <math.h>
 
 Tool::Tool()
 {
@@ -34,13 +34,16 @@ void Tool::setTfIdf(map<QString, double> value) {
 	tfIdf = value;
 }
 
-map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow,  multimap<int, map<QString, int>>& classBoWs, int parentClass) {
+map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow, multimap<int, map<QString, int>>& classBoWs, map<int, int> wordsInClass, int parentClass) {
 	multimap<int, map<QString, int>>::iterator searchParent, itParents;
 
 	//Basis-Map erzeugen
 	for (auto it = baseBow.begin(); it != baseBow.end(); ++it) {
 		tfIdf[it->first] = (double)it->second;
 	}
+
+	//Anzahl aller Worte der Klasse finden
+	int words = wordsInClass[parentClass];
 
 	//Klasse finden
 	searchParent = classBoWs.find(parentClass);
@@ -55,7 +58,6 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow,  multimap<i
 		QStringList::iterator it;
 		for (it = wordList.begin(); it != wordList.end(); ++it) {
 			int wordFrequencyInClass = 0;
-			int allWordsInClass = 0;
 			int classesWithWord = 0;
 			map<QString, int>::iterator searchWords = parentClassBoW.find((*it));
 
@@ -64,24 +66,23 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow,  multimap<i
 				wordFrequencyInClass = searchWords->second;
 			}
 
-			//Die Häufigkeit aller Wörter der Klasse abrufen
-			//IRGENDWO ABSPEICHERN! NICHT JEDES MAL NEU MACHEN! -> Property von ToolParentClass!
-
-
 			//durch die Klassen loopen und zählen, in wie vielen das Wort vorkommt
 			map<QString, int>::iterator searchInClass;
 			for (itParents = classBoWs.begin(); itParents != classBoWs.end(); ++itParents) {
 				searchInClass = itParents->second.find((*it));
 
-				if (searchInClass != itParents->second.end()) {
+				if (searchInClass != itParents->second.end() && searchInClass->second > 0) {
 					classesWithWord += 1;
 					continue;
 				}
 			}
 
 			//tf-idf berechnen
-			// !!! nicht durch wordlist-size, sondern alle Wörter der Klasse !!!
-			tfIdf[searchWords->first] = (wordFrequencyInClass/allWordsInClass) / log(8 / (classesWithWord + 1));
+			/*double z = (double)wordFrequencyInClass / (double)words;
+			double nen = log10(8.0 / (double)classesWithWord);
+			double n = z / (n + 1.0);*/
+			tfIdf[searchWords->first] = ((double)wordFrequencyInClass / (double)words) / (log10(8.0 / (double)classesWithWord) + 1);
+			int c = 5;
 		}
 		return tfIdf;
 	}

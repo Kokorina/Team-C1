@@ -251,7 +251,7 @@ void CsvFile::writeVectorFile(QString path) {
 		Tool&t = row->getTool();
 
 		//write the file
-		out << t.getName() << " " << row->getParent() << " ";
+		out << row->getParent() << " ";
 		int i = 1;
 		for (pair<const QString, double>& tool : t.getTfIdf()) {
 
@@ -444,33 +444,18 @@ void CsvFile::makeSets(int n) {
 //Problem: Tf-Idf wird nicht zurückgespeichert.
 void CsvFile::addFeatures() {
 
+	multimap<int, map<QString, int>>::iterator it;
+	map<int, int> totalWords;
+	
+	for (it = classBoWs.begin(); it != classBoWs.end(); ++it) {
+		map<QString, int>& BoW = it->second;
+		int total = accumulate(begin(BoW), std::end(BoW), 0, [](const int previous, const std::pair<QString, int>& p) { return previous + p.second; });
+		totalWords.insert(pair<int, int> {it->first, total});
+	}
+
 	for (int i = 0; i < this->rows.size(); ++i) {
 		Tool& t = rows[i].getTool();
-		t.calculateTfIdf(baseBoW, classBoWs, rows[i].getParent());
+		t.calculateTfIdf(baseBoW, classBoWs, totalWords, rows[i].getParent());
 		rows[i].setTool(t);
 	}
-
-
-	/*
-	map<int, ToolParentClass>::iterator itParents;
-	map<QString, ToolSubClass>::iterator itSubclass;
-
-	for (itParents = this->parents.begin(); itParents != this->parents.end(); ++itParents) {
-	map<QString, ToolSubClass>& subclasses = itParents->second.getSubclasses();
-	ToolParentClass& parentClass = itParents->second;
-
-	for (itSubclass = subclasses.begin(); itSubclass != subclasses.end(); ++itSubclass) {
-	ToolSubClass& subclass = itSubclass->second;
-	vector<Tool>& tools = subclass.getTools();
-	//for (int i = 0; i < tools.size(); ++i) {
-	for (int i = 0; i < rows.size(); ++i) {
-	//add tf-idf frequency
-	//Tool& t = tools[i];
-	Tool& t = rows[i].getTool();
-	t.calculateTfIdf(baseBoW, classBoWs, itParents->first);
-	rows[i].setTool(t);
-	//t.setTfIdf(t.calculateTfIdf(baseBoW, classBoWs, itParents->first));
-	}
-	}
-	}*/
 }

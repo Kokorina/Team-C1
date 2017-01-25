@@ -22,10 +22,12 @@ void MainWindow::on_pathButton_clicked() {
     QString path = QFileDialog::getOpenFileName(0, "TSV-Datei öffnen", QDir::currentPath(), "CSV-Dateien(*.csv *.tsv *txt)");
 	ui->filePath->setText(path);
 	csv = csv.readCsv(ui->filePath->text());
+	csv.filterEmptyContexts();
+
 	csv.randomize();
 	csv.writeToFile(path);
 	
-	csv.filterEmptyContexts();
+	
 	csv.makeTotalBoW();
 	csv.makeClassBoWs();
 	csv.addFeatures();
