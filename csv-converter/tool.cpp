@@ -2,6 +2,7 @@
 #include <QStringList>
 #include <cmath>
 #include <math.h>
+#include <numeric>
 
 Tool::Tool()
 {
@@ -34,7 +35,15 @@ void Tool::setTfIdf(map<QString, double> value) {
 	tfIdf = value;
 }
 
-map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow, multimap<int, map<QString, int>>& classBoWs, map<int, int> wordsInClass, int parentClass) {
+void Tool::setLogLikelihood(map<QString, double> value) {
+	logLikelihood = value;
+}
+
+map<QString, double> Tool::getLogLikelihood() {
+	return logLikelihood;
+}
+
+map<QString, double> Tool::calculateTfIdf(map<QString, int>& baseBow, multimap<int, map<QString, int>>& classBoWs, map<int, int> wordsInClass, int parentClass) {
 	multimap<int, map<QString, int>>::iterator searchParent, itParents;
 
 	//Basis-Map erzeugen
@@ -57,6 +66,8 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow, multimap<in
 		//Worte in der wordList suchen und ihr Vorkommen in der Klasse zählen
 		QStringList::iterator it;
 		for (it = wordList.begin(); it != wordList.end(); ++it) {
+			if (*it == "") continue;
+
 			int wordFrequencyInClass = 0;
 			int classesWithWord = 0;
 			map<QString, int>::iterator searchWords = parentClassBoW.find((*it));
@@ -78,15 +89,117 @@ map<QString, double> Tool::calculateTfIdf(map<QString, int> baseBow, multimap<in
 			}
 
 			//tf-idf berechnen
-			/*double z = (double)wordFrequencyInClass / (double)words;
-			double nen = log10(8.0 / (double)classesWithWord);
-			double n = z / (n + 1.0);*/
 			tfIdf[searchWords->first] = ((double)wordFrequencyInClass / (double)words) / (log10(8.0 / (double)classesWithWord) + 1);
-			int c = 5;
 		}
 		return tfIdf;
 	}
-	return tfIdf;
+}
+
+map<QString, double> Tool::calculateTfIdf(map<QString, int>& baseBow, multimap<int, map<QString, int>>& classBoWs, int parentClass) {
+	multimap<int, map<QString, int>>::iterator searchParent, itParents;
+
+	//Basis-Map erzeugen
+	for (auto it = baseBow.begin(); it != baseBow.end(); ++it) {
+		tfIdf[it->first] = (double)it->second;
+	}
+
+	//Klasse finden
+	searchParent = classBoWs.find(parentClass);
+	if (searchParent != classBoWs.end()) {
+		map<QString, int>& parentClassBoW = searchParent->second;
+
+		//Kontexte tokenisieren
+		QString context = this->getKontext();
+		QStringList wordList = context.split(QRegExp("\\W+"));
+
+		//Worte in der wordList suchen und ihr Vorkommen in der Klasse zählen
+		QStringList::iterator it;
+		for (it = wordList.begin(); it != wordList.end(); ++it) {
+
+			if (*it == "") continue;
+
+			int wordFrequencyInClass = 0;
+			int classesWithWord = 0;
+			map<QString, int>::iterator searchWords = parentClassBoW.find((*it));
+
+			//aus ClassBoW die Häufigkeit in der Klasse holen
+			if (searchWords != parentClassBoW.end()) {
+				wordFrequencyInClass = searchWords->second;
+			}
+
+			//durch die Klassen loopen und zählen, in wie vielen das Wort vorkommt
+			map<QString, int>::iterator searchInClass;
+			for (itParents = classBoWs.begin(); itParents != classBoWs.end(); ++itParents) {
+				searchInClass = itParents->second.find((*it));
+
+				if (searchInClass != itParents->second.end() && searchInClass->second > 0) {
+					classesWithWord += 1;
+					continue;
+				}
+			}
+
+			//tf-idf berechnen
+			tfIdf[searchWords->first] = (double)wordFrequencyInClass / (log10(8.0 / (double)classesWithWord) + 1);
+		}
+		return tfIdf;
+	}
 }
 
 
+map<QString, double> Tool::calculateLogLikelihood(map<QString, int>& baseBow, map<QString, int>& totalBow, multimap<int, map<QString, int>>& classBoWs, int parentClass) {
+	multimap<int, map<QString, int>>::iterator searchParent, itParents;
+
+	//Basis-Map erzeugen
+	for (auto it = baseBow.begin(); it != baseBow.end(); ++it) {
+		logLikelihood[it->first] = (double)it->second;
+	}
+
+	//Klasse finden
+	searchParent = classBoWs.find(parentClass);
+	if (searchParent != classBoWs.end()) {
+		map<QString, int>& parentClassBoW = searchParent->second;
+
+		//Zahl aller Worte der klasse
+		int totalWordsInClass = accumulate(begin(parentClassBoW), std::end(parentClassBoW), 0, [](const int previous, const std::pair<QString, int>& p) { return previous + p.second; });
+
+		//Zahl aller Worte im Korpus
+		int totalWordsInCorpus = accumulate(begin(totalBow), std::end(totalBow), 0, [](const int previous, const std::pair<QString, int>& p) { return previous + p.second; });
+
+		//Kontexte tokenisieren
+		QString context = this->getKontext();
+		QStringList wordList = context.split(QRegExp("\\W+"));
+
+		//Worte in der wordList suchen und ihr Vorkommen in der Klasse zählen
+		QStringList::iterator it;
+		for (it = wordList.begin(); it != wordList.end(); ++it) {
+
+			if (*it == "") continue;
+
+			int wordFrequencyInClass = 0;
+
+			map<QString, int>::iterator searchWords = parentClassBoW.find((*it));
+
+			//aus ClassBoW die Häufigkeit in der Klasse holen
+			if (searchWords != parentClassBoW.end()) {
+				wordFrequencyInClass = searchWords->second;
+			}			
+
+			//Häufigkeit im Gesamtkotpus ermitteln
+			int wordFrequencyInCorpus = 0;
+			auto searchTotal = totalBow.find(*it);
+
+			//aus ClassBoW die Häufigkeit im Gesamtkorpus
+			if (searchTotal != totalBow.end()) {
+				wordFrequencyInCorpus = searchTotal->second;
+			}
+
+			double tInClass = (double)wordFrequencyInClass / (double)totalWordsInClass;
+			double tInCorpus = (double)wordFrequencyInCorpus / (double)totalWordsInCorpus;
+
+			//tf-idf berechnen
+			double logLike = wordFrequencyInClass * (log10(tInClass / tInCorpus));
+			logLikelihood[searchWords->first] = logLike;
+		}
+		return logLikelihood;
+	}
+}

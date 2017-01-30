@@ -1,6 +1,5 @@
 #include "CsvFile.h"
 #include <QFile>
-#include <QStringList>
 #include <QTextStream>
 #include <qdebug.h>
 #include <algorithm>
@@ -232,7 +231,7 @@ void CsvFile::writeToFile(QString path) {
 }
 
 
-void CsvFile::writeVectorFile(QString path) {
+void CsvFile::writeTfIdfFile(QString path) {
 	//open file
 	QString pathData = path.insert(path.indexOf(".tsv"), "-tfIdf");
 	QFile file(pathData);
@@ -242,7 +241,7 @@ void CsvFile::writeVectorFile(QString path) {
 	}
 
 	QTextStream out(&file);
-	out.setGenerateByteOrderMark(true);
+	out.setGenerateByteOrderMark(false);
 	out.setCodec("UTF-8");
 
 	vector<CsvRow>::iterator row;
@@ -253,6 +252,7 @@ void CsvFile::writeVectorFile(QString path) {
 		//write the file
 		out << row->getParent() << " ";
 		int i = 1;
+
 		for (pair<const QString, double>& tool : t.getTfIdf()) {
 
 			if (tool.second > 0) {
@@ -264,6 +264,40 @@ void CsvFile::writeVectorFile(QString path) {
 		out << endl;
 	}
 
+	file.close();
+}
+
+void CsvFile::writeLogLikelihoodFile(QString path) {
+	//open file
+	QString pathData = path.insert(path.indexOf(".tsv"), "-log");
+	QFile file(pathData);
+
+	if (!file.open(QIODevice::WriteOnly)) {
+		qDebug() << file.errorString();
+	}
+
+	QTextStream out(&file);
+	out.setGenerateByteOrderMark(false);
+	out.setCodec("UTF-8");
+
+	vector<CsvRow>::iterator row;
+
+	for (row = this->rows.begin(); row < this->rows.end(); ++row) {
+		Tool&t = row->getTool();
+
+		//write the file
+		out << row->getParent() << " ";
+		int i = 1;
+
+		for (pair<const QString, double>& tool : t.getLogLikelihood()) {
+
+			if (tool.second > 0) {
+				out << i << ":" << tool.second << " ";
+			}
+			++i;
+		}
+		out << endl;
+	}
 	file.close();
 }
 
@@ -306,7 +340,7 @@ void CsvFile::randomize() {
 	// Daten mischen
 	//um (z.B. zu Testzwecken) immer die gleiche Randomisierung zu bekommen: seed-Parameter aus re entfernen
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	auto re = default_random_engine(seed);
+	auto re = default_random_engine();
 	shuffle(begin(this->rows), end(this->rows), re);
 }
 
@@ -380,6 +414,7 @@ void CsvFile::makeTotalBoW() {
 				wordCount.at(searchWords->first) += 1;
 			}
 			else {
+				if (*it == "") continue;
 				wordCount.insert(pair<QString, int>((*it), 1));
 			}
 		}
@@ -402,17 +437,6 @@ void CsvFile::makeBaseBoW() {
 }
 
 void CsvFile::makeSets(int n) {
-	//Daten ohne Kontext filtern
-	//ACHTUNG! Wenn Klassifizierung in gesonderter Methode stattfindet, gehört dieser Code dahin!
-	/* vector<CsvRow> data = this->rows;
-
-	 for (int i = 0; i < data.size(); ++i) {
-	 if (data.at(i).getTool().getKontext() == "NA") {
-	 data.erase(data.begin() + i);
-	 --i;
-	 }
-	 }*/
-
 	vector<CsvRow> data = this->rows;
 
 	this->makeClassBoWs();
@@ -443,19 +467,12 @@ void CsvFile::makeSets(int n) {
 
 //Problem: Tf-Idf wird nicht zurückgespeichert.
 void CsvFile::addFeatures() {
-
 	multimap<int, map<QString, int>>::iterator it;
-	map<int, int> totalWords;
-	
-	for (it = classBoWs.begin(); it != classBoWs.end(); ++it) {
-		map<QString, int>& BoW = it->second;
-		int total = accumulate(begin(BoW), std::end(BoW), 0, [](const int previous, const std::pair<QString, int>& p) { return previous + p.second; });
-		totalWords.insert(pair<int, int> {it->first, total});
-	}
 
 	for (int i = 0; i < this->rows.size(); ++i) {
 		Tool& t = rows[i].getTool();
-		t.calculateTfIdf(baseBoW, classBoWs, totalWords, rows[i].getParent());
+		t.calculateTfIdf(baseBoW, classBoWs, rows[i].getParent());
+		//t.calculateLogLikelihood(baseBoW, totalBoW, classBoWs, rows[i].getParent());
 		rows[i].setTool(t);
 	}
 }

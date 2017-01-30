@@ -25,13 +25,13 @@ void MainWindow::on_pathButton_clicked() {
 	csv.filterEmptyContexts();
 
 	csv.randomize();
-	csv.writeToFile(path);
-	
+	//csv.writeToFile(path);
 	
 	csv.makeTotalBoW();
 	csv.makeClassBoWs();
 	csv.addFeatures();
-	csv.writeVectorFile(path);
+	csv.writeTfIdfFile(path);
+	//csv.writeLogLikelihoodFile(path);
 
 	//csv.makeSets(numSets->value());
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <qstringlist.h>
 #include <vector>
 #include <map>
 #include "csvRow.h"
@@ -26,7 +27,8 @@ public:
 	CsvFile readCsv(QString path);
 	void writeToFile(QString path);
 	void writeLabelFile(QString pathLabels);
-	void writeVectorFile(QString path);
+	void writeTfIdfFile(QString path);
+	void writeLogLikelihoodFile(QString path);
 
 	void filterEmptyContexts();
 	void randomize();
@@ -44,6 +46,5 @@ private:
 	multimap<int, map<QString, int>> classBoWs;
 	map<QString, int> totalBoW;
 	map<QString, int> baseBoW;
-
 };
 
